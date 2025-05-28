@@ -6,6 +6,16 @@ const status = document.getElementById('status');
 const progressBar = document.getElementById('progressBar');
 const progressText = document.getElementById('progressText');
 
+// Boyut formatlama fonksiyonu
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
 // Oynat butonu tıklandığında - güncelle sonra oyunu başlat
 playBtn.addEventListener('click', async () => {
     playBtn.disabled = true;
@@ -66,9 +76,32 @@ ipcRenderer.on('update-failed', (event, error) => {
 });
 
 ipcRenderer.on('progress', (event, data) => {
-    const percentage = (data.task / data.total) * 100;
+    // Byte tabanlı progress yüzdesini kullan
+    const percentage = data.bytePercentage !== undefined ? data.bytePercentage : (data.task / data.total) * 100;
     progressBar.style.width = `${percentage}%`;
-    progressText.textContent = `Eserler dövülüyor: ${data.task} / ${data.total} ${data.type}`;
+    
+    // Yeni formatlı boyut bilgilerini kullan
+    if (data.totalSizeFormatted && data.downloadedSizeFormatted !== undefined) {
+        if (data.filesToDownload > 0) {
+            progressText.textContent = `Norse eserleri dövülüyor: ${data.task}/${data.total} dosya | ${data.downloadedSizeFormatted}/${data.totalSizeFormatted} | Kalan: ${data.remainingSizeFormatted}`;
+        } else {
+            progressText.textContent = `Tüm eserler hazır: ${data.totalSizeFormatted} | Valhalla'ya hazır!`;
+        }
+    } else if (data.totalBytes && data.downloadedBytes !== undefined) {
+        // Fallback: eski format
+        const totalSize = formatBytes(data.totalBytes);
+        const downloadedSize = formatBytes(data.downloadedBytes);
+        const remainingSize = formatBytes(data.totalBytes - data.downloadedBytes);
+        
+        if (data.filesToDownload > 0) {
+            progressText.textContent = `Norse eserleri dövülüyor: ${data.task}/${data.total} dosya | ${downloadedSize}/${totalSize} | Kalan: ${remainingSize}`;
+        } else {
+            progressText.textContent = `Tüm eserler hazır: ${totalSize} | Valhalla'ya hazır!`;
+        }
+    } else {
+        // Son fallback: sadece dosya sayısı
+        progressText.textContent = `Eserler dövülüyor: ${data.task} / ${data.total} ${data.type}`;
+    }
 });
 
 ipcRenderer.on('error', (event, message) => {
@@ -158,12 +191,20 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     // Güncelleme kontrolü
     status.innerHTML = '<span class="status-icon">🔍</span><span>Güncellemeler kontrol ediliyor...</span>';
+    progressText.textContent = 'Norse veri tabanı kontrol ediliyor...';
     
     const result = await ipcRenderer.invoke('check-updates');
-    
-    if (result.needsUpdate) {
+      if (result.needsUpdate) {
         status.innerHTML = '<span class="status-icon">⚡</span><span>Savaşa hazır</span>';
-        progressText.textContent = 'Yolculuğunuza başlamak için Oyna\'ya tıklayın';
+        
+        if (result.updateSizeFormatted) {
+            progressText.textContent = `${result.filesToUpdate} dosya güncellenmeli (${result.updateSizeFormatted}) - Oyna'ya tıklayın`;
+        } else if (result.updateSize > 0) {
+            const updateSize = formatBytes(result.updateSize);
+            progressText.textContent = `${result.filesToUpdate} dosya güncellenmeli (${updateSize}) - Oyna'ya tıklayın`;
+        } else {
+            progressText.textContent = `${result.filesToUpdate} dosya güncellenmeli - Oyna'ya tıklayın`;
+        }
         updateBtn.style.display = 'flex'; // Güncelleme butonunu göster
     } else {
         status.innerHTML = '<span class="status-icon">✅</span><span>Oyun güncel</span>';
