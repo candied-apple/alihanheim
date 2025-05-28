@@ -1,12 +1,17 @@
 {
     "name": "alihanheim",
     "description": "Alihanheim Valheim Game Updater",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "author": "candiedapple",
     "license": "MIT",
     "main": "main.js",
     "scripts": {
-        "start": "electron ."
+        "start": "electron .",
+        "dev": "electron . --dev",
+        "build": "electron-builder",
+        "build-win": "electron-builder --win",
+        "build-mac": "electron-builder --mac",
+        "build-linux": "electron-builder --linux"
     },
     "build": {
         "appId": "com.candiedapple.alihanheim",
@@ -43,7 +48,8 @@
         }
     },
     "dependencies": {
-        "electron-updater": "^6.2.1"
+        "electron-updater": "^6.2.1",
+        "electron-log": "^5.0.1"
     },
     "devDependencies": {
         "electron": "^31.3.1",

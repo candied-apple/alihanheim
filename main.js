@@ -12,7 +12,18 @@ let gamePath;
 
 // Configure auto-updater
 autoUpdater.checkForUpdatesAndNotify();
-autoUpdater.autoDownload = false;
+autoUpdater.autoDownload = true; // Enable auto-download
+
+// Force update checks in development mode
+if (!app.isPackaged) {
+    autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml');
+    autoUpdater.forceDevUpdateConfig = true;
+    console.log('Running in development mode - forcing update config');
+}
+
+// Set logger for debugging
+autoUpdater.logger = require('electron-log');
+autoUpdater.logger.transports.file.level = 'info';
 
 // Auto-updater events
 autoUpdater.on('checking-for-update', () => {
@@ -72,10 +83,19 @@ function createWindow() {
     const userDataPath = path.normalize(app.getPath('userData'));
     gamePath = path.join(userDataPath, '.alihanheimfiles');
     
-    // Check for app updates after window is ready
-    setTimeout(() => {
-        autoUpdater.checkForUpdatesAndNotify();
-    }, 3000);
+    // Check for app updates immediately after window is ready
+    mainWindow.webContents.once('did-finish-load', () => {
+        setTimeout(() => {
+            if (app.isPackaged) {
+                // Only check for updates if app is packaged
+                autoUpdater.checkForUpdatesAndNotify();
+            } else {
+                // In development, skip app updates and go straight to game updates
+                console.log('Development mode - skipping app updates');
+                mainWindow.webContents.send('app-update-not-available');
+            }
+        }, 1000);
+    });
 }
 
 app.whenReady().then(createWindow);

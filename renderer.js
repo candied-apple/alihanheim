@@ -114,69 +114,91 @@ ipcRenderer.on('error', (event, message) => {
 // App update variables
 let appUpdateAvailable = false;
 let appUpdateDownloaded = false;
+let isCheckingAppUpdates = false;
+let isDownloadingAppUpdate = false;
 
 // App update event listeners
 ipcRenderer.on('app-update-checking', () => {
     console.log('Checking for app updates...');
+    isCheckingAppUpdates = true;
+    status.innerHTML = '<span class="status-icon">🔄</span><span>Uygulama güncellemeleri kontrol ediliyor...</span>';
+    progressText.textContent = 'Launcher güncellemeleri aranıyor...';
+    progressBar.style.width = '0%';
 });
 
 ipcRenderer.on('app-update-available', (event, info) => {
     appUpdateAvailable = true;
-    showAppUpdateNotification('Uygulama güncellemesi mevcut!', `Yeni sürüm: ${info.version}`);
+    isCheckingAppUpdates = false;
+    isDownloadingAppUpdate = true;
+    status.innerHTML = '<span class="status-icon">⬇️</span><span>Uygulama güncellemesi indiriliyor...</span>';
+    progressText.textContent = `Yeni sürüm ${info.version} indiriliyor...`;
+    progressBar.style.width = '0%';
 });
 
 ipcRenderer.on('app-update-not-available', () => {
-    console.log('App is up to date');
+    console.log('App is up to date or in development mode');
+    isCheckingAppUpdates = false;
+    isDownloadingAppUpdate = false;
+    // Proceed to check game updates
+    checkGameUpdates();
 });
 
 ipcRenderer.on('app-update-error', (event, error) => {
-    showAppUpdateNotification('Güncelleme hatası', `Hata: ${error}`, 'error');
+    console.log('App update error:', error);
+    isCheckingAppUpdates = false;
+    isDownloadingAppUpdate = false;
+    // Proceed to check game updates despite app update error
+    checkGameUpdates();
 });
 
 ipcRenderer.on('app-update-download-progress', (event, progressObj) => {
-    const percent = Math.round(progressObj.percent);
-    showAppUpdateNotification('Güncelleme indiriliyor...', `${percent}% tamamlandı`);
+    if (isDownloadingAppUpdate) {
+        const percent = Math.round(progressObj.percent);
+        progressBar.style.width = `${percent}%`;
+        const downloaded = formatBytes(progressObj.transferred);
+        const total = formatBytes(progressObj.total);
+        progressText.textContent = `Uygulama güncellemesi: ${percent}% | ${downloaded}/${total}`;
+    }
 });
 
 ipcRenderer.on('app-update-downloaded', (event, info) => {
     appUpdateDownloaded = true;
-    showAppUpdateNotification('Güncelleme hazır!', 'Yeniden başlatmak için tıklayın', 'success', true);
+    isDownloadingAppUpdate = false;
+    status.innerHTML = '<span class="status-icon">🔄</span><span>Güncelleme yeniden başlatılıyor...</span>';
+    progressBar.style.width = '100%';
+    progressText.textContent = 'Güncelleme tamamlandı, yeniden başlatılıyor...';
+    
+    // Auto-install after 2 seconds
+    setTimeout(async () => {
+        await ipcRenderer.invoke('install-app-update');
+    }, 2000);
 });
 
-// Function to show app update notifications
-function showAppUpdateNotification(title, message, type = 'info', clickToInstall = false) {
-    // Remove existing notification
-    const existingNotification = document.querySelector('.app-update-notification');
-    if (existingNotification) {
-        existingNotification.remove();
-    }
-
-    const notification = document.createElement('div');
-    notification.className = `app-update-notification ${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <div class="notification-title">${title}</div>
-            <div class="notification-message">${message}</div>
-            ${clickToInstall ? '<div class="notification-action">Yüklemek için tıklayın</div>' : ''}
-        </div>
-    `;
+// Function to check game updates
+async function checkGameUpdates() {
+    status.innerHTML = '<span class="status-icon">🔍</span><span>Oyun güncellemeleri kontrol ediliyor...</span>';
+    progressText.textContent = 'Norse veri tabanı kontrol ediliyor...';
+    progressBar.style.width = '0%';
     
-    if (clickToInstall) {
-        notification.style.cursor = 'pointer';
-        notification.addEventListener('click', async () => {
-            await ipcRenderer.invoke('install-app-update');
-        });
-    }
+    const result = await ipcRenderer.invoke('check-updates');
     
-    document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds unless it's clickable
-    if (!clickToInstall) {
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 5000);
+    if (result.needsUpdate) {
+        status.innerHTML = '<span class="status-icon">⚡</span><span>Savaşa hazır</span>';
+        
+        if (result.updateSizeFormatted) {
+            progressText.textContent = `${result.filesToUpdate} dosya güncellenmeli (${result.updateSizeFormatted}) - Oyna'ya tıklayın`;
+        } else if (result.updateSize > 0) {
+            const updateSize = formatBytes(result.updateSize);
+            progressText.textContent = `${result.filesToUpdate} dosya güncellenmeli (${updateSize}) - Oyna'ya tıklayın`;
+        } else {
+            progressText.textContent = `${result.filesToUpdate} dosya güncellenmeli - Oyna'ya tıklayın`;
+        }
+        updateBtn.style.display = 'flex';
+    } else {
+        status.innerHTML = '<span class="status-icon">✅</span><span>Oyun güncel</span>';
+        progressText.textContent = 'Doğrudan oyuna girebilirsiniz!';
+        updateBtn.style.display = 'none';
+        playBtn.innerHTML = '<span class="icon">⚔️</span><span>Valheim\'e Gir</span>';
     }
 }
 
@@ -189,32 +211,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         mainImagePlaceholder.style.display = 'none';
     }
     
-    // Güncelleme kontrolü
-    status.innerHTML = '<span class="status-icon">🔍</span><span>Güncellemeler kontrol ediliyor...</span>';
-    progressText.textContent = 'Norse veri tabanı kontrol ediliyor...';
-    
-    const result = await ipcRenderer.invoke('check-updates');
-      if (result.needsUpdate) {
-        status.innerHTML = '<span class="status-icon">⚡</span><span>Savaşa hazır</span>';
-        
-        if (result.updateSizeFormatted) {
-            progressText.textContent = `${result.filesToUpdate} dosya güncellenmeli (${result.updateSizeFormatted}) - Oyna'ya tıklayın`;
-        } else if (result.updateSize > 0) {
-            const updateSize = formatBytes(result.updateSize);
-            progressText.textContent = `${result.filesToUpdate} dosya güncellenmeli (${updateSize}) - Oyna'ya tıklayın`;
-        } else {
-            progressText.textContent = `${result.filesToUpdate} dosya güncellenmeli - Oyna'ya tıklayın`;
-        }
-        updateBtn.style.display = 'flex'; // Güncelleme butonunu göster
-    } else {
-        status.innerHTML = '<span class="status-icon">✅</span><span>Oyun güncel</span>';
-        progressText.textContent = 'Doğrudan oyuna girebilirsiniz!';
-        updateBtn.style.display = 'none'; // Güncelleme butonunu gizle
-        playBtn.innerHTML = '<span class="icon">⚔️</span><span>Valheim\'e Gir</span>';
-    }
-    
-    // Add app update check
-    setTimeout(async () => {
-        await ipcRenderer.invoke('check-app-updates');
-    }, 2000);
+    // Start with app update check - game updates will be checked after app updates are done
+    status.innerHTML = '<span class="status-icon">🔄</span><span>Başlatılıyor...</span>';
+    progressText.textContent = 'Uygulama başlatılıyor...';
+    progressBar.style.width = '0%';
 });
