@@ -37,7 +37,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(15, 23, 42, 0.8) 25%, rgba(30, 41, 59, 0.7) 50%, rgba(51, 65, 85, 0.6) 75%, rgba(71, 85, 105, 0.5) 100%);
+            background: linear-gradient(135deg, 
+                rgba(0, 24, 33, 0.7) 0%, 
+                rgba(13, 52, 69, 0.6) 25%, 
+                rgba(19, 78, 92, 0.5) 50%, 
+                rgba(26, 59, 42, 0.5) 75%, 
+                rgba(46, 32, 32, 0.6) 100%);
             pointer-events: none;
         }
 
@@ -58,13 +63,13 @@
             font-family: 'Norse', serif;
             font-weight: 700;
             font-size: 2.5rem;
-            background: linear-gradient(45deg, #e879f9, #a78bfa, #60a5fa, #34d399);
+            background: linear-gradient(45deg, #38bec9, #0ea5e9, #22c55e, #f97316);
             background-size: 300% 300%;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
-            text-shadow: 0 0 30px rgba(168, 139, 250, 0.3);
+            text-shadow: 0 0 30px rgba(20, 184, 166, 0.5);
             letter-spacing: 1px;
             animation: gradientShift 6s ease-in-out infinite;
         }
@@ -76,7 +81,7 @@
 
         .runes {
             font-size: 1.5rem;
-            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            background: linear-gradient(45deg, #f59e0b, #d97706);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -96,13 +101,13 @@
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6);
+            background: linear-gradient(135deg, #0ea5e9, #22c55e, #f97316);
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 
-                0 0 30px rgba(139, 92, 246, 0.4),
-                0 0 60px rgba(236, 72, 153, 0.2),
+                0 0 30px rgba(20, 184, 166, 0.5),
+                0 0 60px rgba(14, 165, 233, 0.3),
                 inset 0 0 0 3px rgba(255, 255, 255, 0.1);
             overflow: hidden;
             position: relative;
@@ -113,8 +118,8 @@
         .main-image:hover {
             transform: scale(1.05) rotate(2deg);
             box-shadow: 
-                0 0 40px rgba(139, 92, 246, 0.6),
-                0 0 80px rgba(236, 72, 153, 0.3),
+                0 0 40px rgba(20, 184, 166, 0.7),
+                0 0 80px rgba(14, 165, 233, 0.4),
                 inset 0 0 0 3px rgba(255, 255, 255, 0.2);
         }
 
@@ -154,16 +159,18 @@
         }
 
         .status-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(13, 52, 69, 0.35);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(20, 184, 166, 0.2);
             border-radius: 8px;
             padding: 4px 6px;
             margin: 6px 0;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
             margin-left: auto;
             margin-right: auto;
-        }        .status { 
+        }
+        
+        .status { 
             font-size: 1rem;
             color: #f8fafc;
             margin-bottom: 20px;
@@ -173,7 +180,7 @@
             gap: 10px;
             font-weight: 500;
             font-family: 'Norse', serif;
-            transition: all 0.6s ease; /* Yumuşak geçişler */
+            transition: all 0.6s ease;
         }
 
         .status-icon {
@@ -195,10 +202,10 @@
 
         .progress-bar { 
             height: 100%; 
-            background: linear-gradient(90deg, #8b5cf6, #ec4899, #3b82f6);
+            background: linear-gradient(90deg, #0ea5e9, #22c55e, #f97316);
             transition: width 0.4s ease;
             border-radius: 10px;
-            box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+            box-shadow: 0 0 12px rgba(20, 184, 166, 0.6);
             position: relative;
         }
 
@@ -281,28 +288,28 @@
         }
 
         #playBtn { 
-            background: linear-gradient(135deg, #ec4899, #be185d);
+            background: linear-gradient(135deg, #0ea5e9, #0c4a6e);
             color: white;
             font-size: 1.1rem;
             padding: 16px 32px;
-            box-shadow: 0 6px 25px rgba(236, 72, 153, 0.4);
+            box-shadow: 0 6px 25px rgba(14, 165, 233, 0.4);
         }
 
         #playBtn:hover:not(:disabled) { 
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(236, 72, 153, 0.6);
+            box-shadow: 0 8px 30px rgba(14, 165, 233, 0.6);
         }
 
         #updateBtn {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            background: linear-gradient(135deg, #22c55e, #166534);
             color: white;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
             display: none; /* Başlangıçta gizli */
         }
 
         #updateBtn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
+            box-shadow: 0 6px 25px rgba(34, 197, 94, 0.6);
         }
 
         .icon {
@@ -324,9 +331,9 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(13, 52, 69, 0.85);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(20, 184, 166, 0.2);
             border-radius: 12px;
             padding: 16px 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -334,19 +341,19 @@
             min-width: 280px;
             max-width: 350px;
             animation: slideInRight 0.3s ease-out;
-            color: #1e293b;
+            color: #f8fafc;
         }
 
         .app-update-notification.info {
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #0ea5e9;
         }
 
         .app-update-notification.success {
-            border-left: 4px solid #10b981;
+            border-left: 4px solid #22c55e;
         }
 
         .app-update-notification.error {
-            border-left: 4px solid #ef4444;
+            border-left: 4px solid #f97316;
         }
 
         .notification-content {
@@ -358,19 +365,19 @@
         .notification-title {
             font-weight: 600;
             font-size: 0.95rem;
-            color: #0f172a;
+            color: #f8fafc;
             font-family: 'Norse', serif;
         }
 
         .notification-message {
             font-size: 0.85rem;
-            color: #475569;
+            color: #cbd5e1;
             font-family: 'Norse', serif;
         }
 
         .notification-action {
             font-size: 0.8rem;
-            color: #3b82f6;
+            color: #38bec9;
             font-weight: 500;
             margin-top: 4px;
             font-family: 'Norse', serif;
