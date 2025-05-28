@@ -1,7 +1,7 @@
 {
     "name": "alihanheim",
     "description": "Alihanheim Valheim Game Updater",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "author": "candiedapple",
     "license": "MIT",
     "main": "main.js",
